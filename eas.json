@@ -1,24 +1,19 @@
 {
-<<<<<<< HEAD
+  "cli": {
+    "version": ">= 3.0.0",
+    "appVersionSource": "remote"
+  },
   "build": {
     "preview": {
       "android": {
         "buildType": "apk"
       }
     },
-    "production": {}
-=======
-  "cli": {
-    "version": ">= 3.0.0",
-    "appVersionSource": "remote"
-  },
-  "build": {
     "production": {
       "autoIncrement": true,
       "android": {
         "buildType": "apk"
       }
     }
->>>>>>> bb6b531 (Начальная версия мобильного приложения Металлург)
   }
 }
