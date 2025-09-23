@@ -1,0 +1,46 @@
+{
+  "expo": {
+    "name": "Металлург Mobile",
+    "slug": "metallurg-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon_mettl.png",
+    "userInterfaceStyle": "light",
+    "jsEngine": "hermes",
+    "runtimeVersion": {
+      "policy": "sdkVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/d328c24c-b79b-4dda-a2f1-b95d66100a2d",
+      "fallbackToCacheTimeout": 0
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.niyaz0912.metallurgmobile"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon_mettl.png",
+        "backgroundColor": "#2c3e50"
+      },
+      "package": "com.niyaz0912.metallurgmobile",
+      "versionCode": 1
+    },
+    "web": {
+      "favicon": "./assets/icon_mettl.png"
+    },
+    "plugins": [
+      "expo-secure-store"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "d328c24c-b79b-4dda-a2f1-b95d66100a2d"
+      },
+      "apiUrl": "http://159.255.39.41"
+    },
+    "newArchEnabled": false
+  }
+}
