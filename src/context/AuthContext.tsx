@@ -1,50 +1,10 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import * as SecureStore from 'expo-secure-store';
 import { login as loginService } from '../services/authService';
 import { getCurrentUserProfile } from '../services/userService';
 import { LoginData, User, UserRole } from '../types/auth';
 import api from '../services/api';
 import { jwtDecode } from 'jwt-decode';
-import { Platform } from 'react-native';
-
-// --- Helper functions for platform-specific storage ---
-
-async function saveToken(token: string) {
-  if (Platform.OS === 'web') {
-    try {
-      localStorage.setItem('userToken', token);
-    } catch (e) {
-      console.error("Failed to save token to localStorage", e);
-    }
-  } else {
-    await SecureStore.setItemAsync('userToken', token);
-  }
-}
-
-async function getToken() {
-  if (Platform.OS === 'web') {
-    try {
-      return localStorage.getItem('userToken');
-    } catch (e) {
-      console.error("Failed to get token from localStorage", e);
-      return null;
-    }
-  } else {
-    return await SecureStore.getItemAsync('userToken');
-  }
-}
-
-async function deleteToken() {
-  if (Platform.OS === 'web') {
-    try {
-      localStorage.removeItem('userToken');
-    } catch (e) {
-      console.error("Failed to remove token from localStorage", e);
-    }
-  } else {
-    await SecureStore.deleteItemAsync('userToken');
-  }
-}
+import { TokenStorage } from '../utils/tokenStorage';
 
 interface DecodedToken {
   userId: number;
@@ -55,7 +15,6 @@ interface DecodedToken {
 }
 
 // --- Auth Context ---
-
 interface AuthContextData {
   user: User | null;
   token: string | null;
@@ -67,7 +26,7 @@ interface AuthContextData {
   refreshUserProfile: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextData>({} as AuthContextData);
+const AuthContext = createContext({} as AuthContextData);
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -103,7 +62,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         
         const departmentNames: Record<number, string> = {
           1: "Административный",
-          2: "HR департамент", 
+          2: "HR департамент",   
           3: "Департамент качества",
           4: "Коммерческий департамент",
           5: "Производственный департамент",
@@ -175,7 +134,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => {
     async function loadStoragedData() {
       console.log('📦 Loading stored authentication data...');
-      const storedToken = await getToken();
+      const storedToken = await TokenStorage.getToken();
       
       if (storedToken) {
         try {
@@ -190,7 +149,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           // Проверяем валидность токена
           if (decodedToken.exp * 1000 < Date.now()) {
             console.log('⏰ Token expired, removing...');
-            await deleteToken();
+            await TokenStorage.removeToken();
             setIsLoading(false);
             return;
           }
@@ -204,7 +163,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           
         } catch (e) {
           console.error("❌ Failed to decode token or load profile:", e);
-          await deleteToken();
+          await TokenStorage.removeToken();
         }
       } else {
         console.log('📭 No stored token found');
@@ -229,7 +188,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Устанавливаем токен и заголовки
       setToken(responseToken);
       api.defaults.headers.common['Authorization'] = `Bearer ${responseToken}`;
-      await saveToken(responseToken);
+      await TokenStorage.setToken(responseToken);
       
       console.log('💾 Token saved, loading full user profile...');
       
@@ -247,7 +206,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     console.log('🚪 Starting logout process...');
     
     try {
-      await deleteToken();
+      await TokenStorage.removeToken();
       setUser(null);
       setToken(null);
       setProfileError(null);
@@ -285,5 +244,3 @@ export function useAuth() {
   }
   return context;
 }
-
-

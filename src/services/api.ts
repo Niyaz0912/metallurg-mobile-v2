@@ -1,48 +1,67 @@
-import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios, { InternalAxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
+import { getApiConfig } from '../config/apiConfig';
+import { TokenStorage } from '../utils/tokenStorage';
 import { Alert } from 'react-native';
 
+// Получаем конфигурацию API
+const config = getApiConfig();
+console.log('🔧 API Configuration:', config);
+
+// Создаем экземпляр axios с динамической конфигурацией
 const api = axios.create({
-  baseURL: 'http://159.255.39.41',
-  timeout: 10000,
+  baseURL: config.baseURL,
+  timeout: config.timeout,
 });
 
-api.interceptors.request.use(async (config) => {
+// Interceptor для добавления токена авторизации
+api.interceptors.request.use(async (requestConfig: InternalAxiosRequestConfig) => {
   try {
-    const token = await AsyncStorage.getItem('userToken');
-    console.log('Token for request:', token);
-
-    // Безопасная проверка на undefined
-    const baseURL = config.baseURL || '';
-    const url = config.url || '';
-    console.log('Request URL:', baseURL + url);
-
-    // Alert для диагностики API-запроса
-    Alert.alert(
-      'API REQUEST',
-      `baseURL: ${baseURL}\nurl: ${url}\ntoken: ${token}`
-    );
+    const token = await TokenStorage.getToken();
+    
+    if (config.isDevelopment) {
+      console.log('Token for request:', token);
+      
+      // Безопасная проверка на undefined
+      const baseURL = requestConfig.baseURL || '';
+      const url = requestConfig.url || '';
+      console.log('Request URL:', baseURL + url);
+      
+      // Alert только в development режиме
+      Alert.alert(
+        'API REQUEST',
+        `baseURL: ${baseURL}\nurl: ${url}\ntoken: ${token ? 'present' : 'missing'}`
+      );
+    }
 
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+      requestConfig.headers.Authorization = `Bearer ${token}`;
     }
   } catch (e) {
     console.error('Failed to get token for request', e);
-    Alert.alert('Token error', JSON.stringify(e));
+    
+    if (config.isDevelopment) {
+      Alert.alert('Token error', e instanceof Error ? e.message : String(e));
+    }
   }
-  return config;
+  return requestConfig;
 });
 
-// Перехват ошибок ответа
+// Interceptor для обработки ошибок ответа
 api.interceptors.response.use(
-  response => response,
-  error => {
-    Alert.alert('API RESPONSE ERROR', JSON.stringify(error?.message ?? error));
-    console.log('API RESPONSE ERROR:', error);
+  (response: AxiosResponse) => response,
+  (error: AxiosError) => {
+    console.error('API RESPONSE ERROR:', error);
+    
+    // Показываем Alert только в development режиме
+    if (config.isDevelopment) {
+      const errorMessage = error.message || 
+                          error.response?.statusText || 
+                          'Unknown error';
+      Alert.alert('API RESPONSE ERROR', errorMessage);
+    }
+    
     return Promise.reject(error);
   }
 );
 
 export default api;
-
-
