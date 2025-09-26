@@ -6,17 +6,19 @@ export default {
     orientation: "portrait",
     icon: "./assets/icon_mettl.png",
     userInterfaceStyle: "light",
-    
+
     android: {
       adaptiveIcon: {
         foregroundImage: "./assets/icon_mettl.png",
         backgroundColor: "#2c3e50"
       },
-      package: "com.niyaz0912.metallurgmobileclean"
+      package: "com.niyaz0912.metallurgmobileclean",
+      usesCleartextTraffic: true
     },
-    
+
+
     plugins: ["expo-secure-store"],
-    
+
     extra: {
       eas: {
         projectId: "f116e8a7-3bc2-437d-a401-eb627c6fd7dd"
