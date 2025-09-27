@@ -2,7 +2,7 @@ require('dotenv').config();
 
 export default {
   expo: {
-    name: "Металлург Mobile Clean",
+    name: "Металлург Mobile",
     slug: "metallurg-mobile-clean",
     version: "1.0.0",
     orientation: "portrait",
@@ -13,18 +13,28 @@ export default {
         foregroundImage: "./assets/icon_mettl.png",
         backgroundColor: "#2c3e50"
       },
-      package: "com.niyaz0912.metallurgmobileclean",
-      usesCleartextTraffic: true
+      package: "com.niyaz0912.metallurgmobileclean"
     },
-    plugins: ["expo-secure-store"],
+    plugins: [
+      "expo-secure-store",
+      [
+        "expo-build-properties", 
+        {
+          "android": {
+            "usesCleartextTraffic": true
+          }
+        }
+      ]
+    ],
     extra: {
       eas: {
         projectId: "f116e8a7-3bc2-437d-a401-eb627c6fd7dd"
       },
-      apiUrl: process.env.EXPO_PUBLIC_API_URL || "http://159.255.39.41",
+      apiUrl: process.env.EXPO_PUBLIC_API_URL || "http://159.255.39.41/api",
       apiHost: process.env.EXPO_PUBLIC_API_HOST || "159.255.39.41",
       apiPort: process.env.EXPO_PUBLIC_API_PORT || "80"
     }
   }
 };
+
 
